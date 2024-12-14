@@ -55,46 +55,49 @@ public class GameManager : MonoBehaviour
     }
     
     private void SpawnEnemies()
+{
+    int gridRows = 10;
+    int gridColumns = 10;
+
+    float cellWidth = (_enemySpawnAreaColliderMaxX - _enemySpawnAreaColliderMinX) / gridColumns;
+    float cellHeight = (_enemySpawnAreaColliderMaxY - _enemySpawnAreaColliderMinY) / gridRows;
+
+    List<Vector3> potentialSpawnPoints = new();
+
+    for (int x = 0; x < gridColumns; x++)
     {
-        List<Vector3> enemyLocations = new();
-        int attempts = 0;
-
-        while (_currentEnemiesAlive < _enemyCount)
+        for (int y = 0; y < gridRows; y++)
         {
-            if (attempts > 1000)
-            {
-                Debug.LogWarning("Unable to spawn all enemies. Ending loop to avoid infinite loop.");
-                break;
-            }
-            attempts++;
-
-            float randomEnemyX = Random.Range(_enemySpawnAreaColliderMinX, _enemySpawnAreaColliderMaxX);
-            float randomEnemyY = Random.Range(_enemySpawnAreaColliderMinY, _enemySpawnAreaColliderMaxY);
-
-            Vector3 randomEnemyvector = new Vector3(randomEnemyX, randomEnemyY);
-            bool isNearExistingEnemy = false;
-
-            foreach (Vector3 enemyLocation in enemyLocations)
-            {
-                float distance = Vector3.Distance(randomEnemyvector, enemyLocation);
-                if (distance < 10)
-                {
-                    isNearExistingEnemy = true;
-                    break;
-                }
-            }
-
-            Vector3 viewportPoint = Camera.main.WorldToViewportPoint(randomEnemyvector);
-            if (!isNearExistingEnemy &&
-                (viewportPoint.x < 0f || viewportPoint.x > 1f || 
-                 viewportPoint.y < 0f || viewportPoint.y > 1f))
-            {
-                enemyLocations.Add(randomEnemyvector);
-                _currentEnemiesAlive++;
-                Instantiate(enemyPrefab, randomEnemyvector, Quaternion.identity);
-            }
+            float spawnX = _enemySpawnAreaColliderMinX + x * cellWidth + cellWidth / 2;
+            float spawnY = _enemySpawnAreaColliderMinY + y * cellHeight + cellHeight / 2;
+            
+            Vector3 spawnPos = new Vector3(spawnX, spawnY, 0);
+            
+            Vector3 spawnViewPortPoint = Camera.main.WorldToViewportPoint(spawnPos);
+            
+            if (spawnViewPortPoint.x < 0f || 
+                spawnViewPortPoint.x > 1f || 
+                spawnViewPortPoint.y < 0f || 
+                spawnViewPortPoint.y > 1f)
+                potentialSpawnPoints.Add(new Vector3(spawnX, spawnY));
         }
     }
+
+    for (int i = 0; i < potentialSpawnPoints.Count; i++)
+    {
+        int randomIndex = Random.Range(0, potentialSpawnPoints.Count);
+        Vector3 temp = potentialSpawnPoints[i];
+        potentialSpawnPoints[i] = potentialSpawnPoints[randomIndex];
+        potentialSpawnPoints[randomIndex] = temp;
+    }
+
+    for (int i = 0; i < _enemyCount && i < potentialSpawnPoints.Count; i++)
+    {
+        Vector3 spawnPoint = potentialSpawnPoints[i];
+        Instantiate(enemyPrefab, spawnPoint, Quaternion.identity);
+        _currentEnemiesAlive++;
+    }
+}
 
     
     IEnumerator FadeOutStartRoundText()
