@@ -44,3 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85fca157b8b57a8459e6caf371d89a72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  waveCounterText: {fileID: 0}
+  enemySpawnAreaCollider: {fileID: 0}
+  enemyPrefab: {fileID: 492521902487983528, guid: 99e63472f7b68af4c979fe88a9d4204d, type: 3}
