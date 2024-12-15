@@ -28,6 +28,8 @@ public class GameManager : MonoBehaviour
 
     private IObjectPool<Enemy> _enemyPool;
     
+    private List<Enemy> _allEnemies = new List<Enemy>();
+    
     private void Awake()
     {
         if (Instance == null)
@@ -53,6 +55,8 @@ public class GameManager : MonoBehaviour
         _currentEnemiesAlive = 0;
         
         InitializeGrid();
+        PreSpawnEnemies();
+        
         StartRound();
         AudioManager.Instance.StartBattleMusic();
     }
@@ -62,12 +66,34 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         if (_currentEnemiesAlive < _maxEnemyCountAtOnce &&
-            _totalEnemiesSpawnedThisRound < _maxEnemyCountPerRound &&
-            Time.time > timeSinceLastSpawned)
+            _totalEnemiesSpawnedThisRound < _maxEnemyCountPerRound)
         {
-            timeBetweenSpawns = Random.Range(0.8f, 1.2f);
-            _enemyPool.Get();
-            timeSinceLastSpawned = Time.time + timeBetweenSpawns;
+            SpawnNextEnemy(); 
+        }
+    }
+
+    private void SpawnNextEnemy()
+    {
+        if (_currentEnemiesAlive < _maxEnemyCountAtOnce && _totalEnemiesSpawnedThisRound < _maxEnemyCountPerRound)
+        {
+            Enemy enemy = _enemyPool.Get();
+            if (enemy != null)
+            {
+                enemy.gameObject.SetActive(true);
+                enemy.transform.position = GetRandomSpawnPoint();
+                _currentEnemiesAlive++;
+                _totalEnemiesSpawnedThisRound++;
+            }
+        }
+    }
+    
+    private void PreSpawnEnemies()
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            Enemy enemy = _enemyPool.Get();
+            enemy.gameObject.SetActive(false);
+            _allEnemies.Add(enemy);
         }
     }
 
@@ -106,11 +132,7 @@ public class GameManager : MonoBehaviour
                 Vector3 spawnPos = new Vector3(spawnX, spawnY, 0);
 
                 Vector3 spawnViewPortPoint = Camera.main.WorldToViewportPoint(spawnPos);
-                if (spawnViewPortPoint.x < 0f || 
-                    spawnViewPortPoint.x > 1f || 
-                    spawnViewPortPoint.y < 0f || 
-                    spawnViewPortPoint.y > 1f)
-                    _potentialSpawnPoints.Add(new Vector3(spawnX, spawnY));
+                _potentialSpawnPoints.Add(new Vector3(spawnX, spawnY));
             }
         }
     }
@@ -136,15 +158,13 @@ public class GameManager : MonoBehaviour
     {
         enemy.gameObject.SetActive(true);
         enemy.transform.position = GetRandomSpawnPoint();
-        _currentEnemiesAlive++;
-        _totalEnemiesSpawnedThisRound++;
     }
 
     private void OnReleaseEnemy(Enemy enemy)
     {
         enemy.gameObject.SetActive(false);
-        _currentEnemiesAlive--;
-
+        _currentEnemiesAlive = Mathf.Max(0, _currentEnemiesAlive - 1);
+        
         if (_currentEnemiesAlive <= 0)
         {
             StartCoroutine(WaitForNextRound());
@@ -155,7 +175,7 @@ public class GameManager : MonoBehaviour
     {
         Destroy(enemy.gameObject);
     }
-    
+
     private Vector3 GetRandomSpawnPoint()
     {
         if (_potentialSpawnPoints.Count == 0)
@@ -163,10 +183,30 @@ public class GameManager : MonoBehaviour
             InitializeGrid();
         }
 
-        int randomIndex = Random.Range(0, _potentialSpawnPoints.Count);
-        Vector3 spawnPoint = _potentialSpawnPoints[randomIndex];
-        _potentialSpawnPoints.RemoveAt(randomIndex);
-        return spawnPoint;
+        Vector3 spawnPoint = Vector3.zero;
+        int maxAttempts = _potentialSpawnPoints.Count;
+        int attempt = 0;
+
+        do
+        {
+            int randomIndex = Random.Range(0, _potentialSpawnPoints.Count);
+            spawnPoint = _potentialSpawnPoints[randomIndex];
+
+            // Check if the spawn point is outside the camera's view.
+            Vector3 viewPortPoint = Camera.main.WorldToViewportPoint(spawnPoint);
+            bool isOutsideView = viewPortPoint.x < 0f || viewPortPoint.x > 1f || viewPortPoint.y < 0f || viewPortPoint.y > 1f;
+
+            if (isOutsideView)
+            {
+                _potentialSpawnPoints.RemoveAt(randomIndex);
+                return spawnPoint;
+            }
+
+            attempt++;
+        } while (attempt < maxAttempts);
+
+        Debug.LogWarning("No valid spawn point found outside the camera view. Using fallback.");
+        return _potentialSpawnPoints[Random.Range(0, _potentialSpawnPoints.Count)];
     }
 
     public void AddPotentialSpawnPoint(Vector3 point)
@@ -188,11 +228,36 @@ public class GameManager : MonoBehaviour
         }
     }
     
+    public int GetCurrentEnemiesAlive()
+    {
+        return _currentEnemiesAlive;
+    }
+
+    public int GetMaxEnemyCountAtOnce()
+    {
+        return _maxEnemyCountAtOnce;
+    }
+
+    public int GetRoundNumber()
+    {
+        return _roundNumber;
+    }
+
+    public int GetTotalEnemiesSpawnedThisRound()
+    {
+        return _totalEnemiesSpawnedThisRound;
+    }
+
+    public int GetMaxEnemyCountPerRound()
+    {
+        return _maxEnemyCountPerRound;
+    }
+    
     IEnumerator FadeOutStartRoundText()
     {
         while (waveCounterText.alpha > 0f)
         {
-            waveCounterText.alpha = Mathf.Lerp(waveCounterText.alpha, 0f, Time.deltaTime * .25f);
+            waveCounterText.alpha = Mathf.Lerp(waveCounterText.alpha, 0f, Time.deltaTime);
             yield return null;
         }
     }

@@ -54,7 +54,7 @@ public class Enemy : MonoBehaviour
     {
         _health = 100;
         transform.position = _spawnPosition;
-        gameObject.SetActive(false);
+        GetComponent<Collider2D>().enabled = true;
     }
 
     private void OnCollisionEnter2D(Collision2D other)
