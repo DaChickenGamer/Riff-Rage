@@ -56,14 +56,14 @@ public class DebugPanel : MonoBehaviour
         TextMeshProUGUI statNameTextBox = new GameObject().AddComponent<TextMeshProUGUI>();
         statNameTextBox.name = "Stat Name";
         statNameTextBox.text = statName;
-        statNameTextBox.enableWordWrapping = true;
+        statNameTextBox.textWrappingMode = TextWrappingModes.Normal;
         statNameTextBox.rectTransform.SetParent(panel.transform);
         statNameTextBox.rectTransform.sizeDelta = new Vector2(350, 30);
     
         TextMeshProUGUI statValueTextBox = new GameObject().AddComponent<TextMeshProUGUI>();
         statValueTextBox.name = "Stat Value";
         statValueTextBox.text = statValue.ToString();
-        statValueTextBox.enableWordWrapping = true; 
+        statValueTextBox.textWrappingMode = TextWrappingModes.Normal;
         statValueTextBox.rectTransform.SetParent(panel.transform);
         statValueTextBox.rectTransform.sizeDelta = new Vector2(350, 30);
 

@@ -57,12 +57,13 @@ public class GameManager : MonoBehaviour
         InitializeGrid();
         PreSpawnEnemies();
         
-        StartRound();
+        StartCoroutine(FadeOutRoundText());
+        StartCoroutine(DelayRoundStart());
         AudioManager.Instance.StartBattleMusic();
     }
 
-    private float timeSinceLastSpawned;
-    private float timeBetweenSpawns;
+    private float _timeSinceLastSpawned;
+    private float _timeBetweenSpawns;
     private void Update()
     {
         if (_currentEnemiesAlive < _maxEnemyCountAtOnce &&
@@ -80,7 +81,9 @@ public class GameManager : MonoBehaviour
             if (enemy != null)
             {
                 enemy.gameObject.SetActive(true);
-                enemy.transform.position = GetRandomSpawnPoint();
+                Vector3 randomSpawnPosition = GetRandomSpawnPoint();
+                enemy.transform.position = randomSpawnPosition;
+                enemy.SetSpawnPosition(randomSpawnPosition);
                 _currentEnemiesAlive++;
                 _totalEnemiesSpawnedThisRound++;
             }
@@ -102,16 +105,15 @@ public class GameManager : MonoBehaviour
         _roundNumber++;
         _totalEnemiesSpawnedThisRound = 0;
         _maxEnemyCountPerRound = 5 + _roundNumber * _roundNumber;
+        
+        // This is a desmos graph for the below equation
+        // https://www.desmos.com/calculator/tthykrvgcq
         _maxEnemyCountAtOnce = Mathf.Clamp(Mathf.RoundToInt(_maxEnemyCountPerRound * 0.25f), 5, 20);
-
-        waveCounterText.alpha = 1;
-        waveCounterText.text = "Wave " + _roundNumber;
-
-        StartCoroutine(FadeOutStartRoundText());
     }
     
-    private int _gridRows = 10;
-    private int _gridColumns = 10;
+    // Increased both to 100 because 10 was making the spawning break for some reason
+    private int _gridRows = 100;
+    private int _gridColumns = 100;
 
     private float _cellWidth;
     private float _cellHeight;
@@ -167,7 +169,8 @@ public class GameManager : MonoBehaviour
         
         if (_currentEnemiesAlive <= 0)
         {
-            StartCoroutine(WaitForNextRound());
+            StartCoroutine(FadeOutRoundText());
+            StartCoroutine(DelayRoundStart());
         }
     }
 
@@ -192,7 +195,6 @@ public class GameManager : MonoBehaviour
             int randomIndex = Random.Range(0, _potentialSpawnPoints.Count);
             spawnPoint = _potentialSpawnPoints[randomIndex];
 
-            // Check if the spawn point is outside the camera's view.
             Vector3 viewPortPoint = Camera.main.WorldToViewportPoint(spawnPoint);
             bool isOutsideView = viewPortPoint.x < 0f || viewPortPoint.x > 1f || viewPortPoint.y < 0f || viewPortPoint.y > 1f;
 
@@ -205,6 +207,7 @@ public class GameManager : MonoBehaviour
             attempt++;
         } while (attempt < maxAttempts);
 
+        // Not adding spawn points back
         Debug.LogWarning("No valid spawn point found outside the camera view. Using fallback.");
         return _potentialSpawnPoints[Random.Range(0, _potentialSpawnPoints.Count)];
     }
@@ -252,18 +255,26 @@ public class GameManager : MonoBehaviour
     {
         return _maxEnemyCountPerRound;
     }
+
+    private float _transitionDuration = 3f;
     
-    IEnumerator FadeOutStartRoundText()
+    IEnumerator FadeOutRoundText()
     {
-        while (waveCounterText.alpha > 0f)
+        waveCounterText.alpha = 1;
+        waveCounterText.text = "Wave " + (_roundNumber + 1);
+
+        float timer = 0; 
+        
+        while (timer < _transitionDuration)
         {
-            waveCounterText.alpha = Mathf.Lerp(waveCounterText.alpha, 0f, Time.deltaTime);
+            waveCounterText.alpha = Mathf.Lerp(1f, 0f, timer / _transitionDuration);
+            timer += Time.deltaTime;
             yield return null;
         }
     }
-    IEnumerator WaitForNextRound()
+    IEnumerator DelayRoundStart()
     {
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(_transitionDuration);
         StartRound();
     }
      
