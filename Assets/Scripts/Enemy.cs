@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class Enemy : MonoBehaviour
 {
@@ -11,6 +12,8 @@ public class Enemy : MonoBehaviour
     private Vector3 _spawnPosition;
 
     private int _health = 100;
+
+    private IObjectPool<Enemy> _enemyPool;
     
     private void Start()
     {
@@ -25,6 +28,11 @@ public class Enemy : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, _player.transform.position, step);
     }
 
+    public void SetPool(IObjectPool<Enemy> pool)
+    {
+        _enemyPool = pool;
+    }
+    
     public void GetDamaged(int damageReceived)
     {
         _health -= damageReceived;
@@ -39,7 +47,14 @@ public class Enemy : MonoBehaviour
         GameManager gameManager = gameManagerObject.GetComponent<GameManager>();
         gameManager.AddPotentialSpawnPoint(_spawnPosition);
         gameManager.DecreaseCurrentEnemiesAlive();
-        Destroy(transform.parent.gameObject);
+        _enemyPool.Release(this);
+    }
+
+    public void ResetEnemy()
+    {
+        _health = 100;
+        transform.position = _spawnPosition;
+        gameObject.SetActive(false);
     }
 
     private void OnCollisionEnter2D(Collision2D other)

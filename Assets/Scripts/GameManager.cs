@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEditor.UI;
 using UnityEngine;
+using UnityEngine.Pool;
 using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
@@ -25,7 +26,7 @@ public class GameManager : MonoBehaviour
     private float _enemySpawnAreaColliderMinX, _enemySpawnAreaColliderMinY, _enemySpawnAreaColliderMaxX, _enemySpawnAreaColliderMaxY;
     private float _playerCameraMinX, _playerCameraMaxX, _playerCameraMinY, _playerCameraMaxY;
 
-    private bool _isNewRoundStarting = false;
+    private IObjectPool<Enemy> _enemyPool;
     
     private void Awake()
     {
@@ -38,6 +39,8 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        _enemyPool = new ObjectPool<Enemy>(CreateEnemy, OnGetEnemy, OnReleaseEnemy, OnDestroyEnemy, false, 20, 20);
     }
     
     private void Start()
@@ -51,29 +54,34 @@ public class GameManager : MonoBehaviour
         
         InitializeGrid();
         StartRound();
+        AudioManager.Instance.StartBattleMusic();
+    }
+
+    private float timeSinceLastSpawned;
+    private float timeBetweenSpawns;
+    private void Update()
+    {
+        if (_currentEnemiesAlive < _maxEnemyCountAtOnce &&
+            _totalEnemiesSpawnedThisRound < _maxEnemyCountPerRound &&
+            Time.time > timeSinceLastSpawned)
+        {
+            timeBetweenSpawns = Random.Range(0.8f, 1.2f);
+            _enemyPool.Get();
+            timeSinceLastSpawned = Time.time + timeBetweenSpawns;
+        }
     }
 
     private void StartRound()
     {
         _roundNumber++;
         _totalEnemiesSpawnedThisRound = 0;
-        
-        _maxEnemyCountPerRound = 5 + _roundNumber * _roundNumber;        
-        
-        // Quadratic Scaling
-        // _maxEnemyCount = Mathf.CeilToInt(1 + _roundNumber * 0.5f); 
-        
-        // Log Growth
-        // _maxEnemyCount = Mathf.RoundToInt(_enemyCount * Mathf.Log(_roundNumber + 1, 2));
-        
-        // Controlled Growth with a min of 5 and cap of 20
+        _maxEnemyCountPerRound = 5 + _roundNumber * _roundNumber;
         _maxEnemyCountAtOnce = Mathf.Clamp(Mathf.RoundToInt(_maxEnemyCountPerRound * 0.25f), 5, 20);
-        
+
         waveCounterText.alpha = 1;
-        waveCounterText.text = "Wave " + _roundNumber.ToString();
+        waveCounterText.text = "Wave " + _roundNumber;
 
         StartCoroutine(FadeOutStartRoundText());
-        SpawnEnemies();
     }
     
     private int _gridRows = 10;
@@ -108,38 +116,57 @@ public class GameManager : MonoBehaviour
     }
 
     private bool _isSpawning;
-    public void SpawnEnemies()
+
+    private Enemy CreateEnemy()
     {
-        if (_isSpawning) return;
-        
-        _isSpawning = true;
-        
-        while (_currentEnemiesAlive < _maxEnemyCountAtOnce)
+        int randomSpawnPointListPosition = Random.Range(0, _potentialSpawnPoints.Count);
+        Vector3 spawnPoint = _potentialSpawnPoints[randomSpawnPointListPosition];
+        _potentialSpawnPoints.RemoveAt(randomSpawnPointListPosition);
+
+        GameObject newEnemy = Instantiate(enemyPrefab, spawnPoint, Quaternion.identity);
+        GameObject sprite = newEnemy.GetComponentInChildren<SpriteRenderer>().gameObject;
+        Enemy enemyScript = sprite.AddComponent<Enemy>();
+        enemyScript.gameManagerObject = gameObject;
+        enemyScript.SetPool(_enemyPool);
+
+        return enemyScript;
+    }
+
+    private void OnGetEnemy(Enemy enemy)
+    {
+        enemy.gameObject.SetActive(true);
+        enemy.transform.position = GetRandomSpawnPoint();
+        _currentEnemiesAlive++;
+        _totalEnemiesSpawnedThisRound++;
+    }
+
+    private void OnReleaseEnemy(Enemy enemy)
+    {
+        enemy.gameObject.SetActive(false);
+        _currentEnemiesAlive--;
+
+        if (_currentEnemiesAlive <= 0)
         {
-            
-            int randomSpawnPointListPosition = Random.Range(0, _potentialSpawnPoints.Count);
-            
-            Vector3 spawnPoint = _potentialSpawnPoints[randomSpawnPointListPosition]; ;
-            GameObject newEnemy = Instantiate(enemyPrefab, spawnPoint, Quaternion.identity);
-            
-            GameObject sprite = newEnemy.GetComponentInChildren<SpriteRenderer>().gameObject;
-            Enemy enemyScript = sprite.AddComponent<Enemy>();
-            enemyScript.gameManagerObject = gameObject;
-            
-            enemyScript.SetSpawnPosition(spawnPoint);
-            
-            _potentialSpawnPoints.RemoveAt(randomSpawnPointListPosition);
-            
-            _totalEnemiesSpawnedThisRound += 1;
-            _currentEnemiesAlive += 1;
+            StartCoroutine(WaitForNextRound());
         }
-        
+    }
+
+    private void OnDestroyEnemy(Enemy enemy)
+    {
+        Destroy(enemy.gameObject);
+    }
+    
+    private Vector3 GetRandomSpawnPoint()
+    {
         if (_potentialSpawnPoints.Count == 0)
         {
             InitializeGrid();
         }
-        
-        _isSpawning = false;
+
+        int randomIndex = Random.Range(0, _potentialSpawnPoints.Count);
+        Vector3 spawnPoint = _potentialSpawnPoints[randomIndex];
+        _potentialSpawnPoints.RemoveAt(randomIndex);
+        return spawnPoint;
     }
 
     public void AddPotentialSpawnPoint(Vector3 point)
@@ -149,16 +176,16 @@ public class GameManager : MonoBehaviour
 
     public void DecreaseCurrentEnemiesAlive()
     {
-        _currentEnemiesAlive -= 1;
-        
-        if (_currentEnemiesAlive < _maxEnemyCountAtOnce && _totalEnemiesSpawnedThisRound < _maxEnemyCountPerRound)
+        if (_currentEnemiesAlive < 0)
         {
-            SpawnEnemies();
+            Debug.LogWarning("Enemies alive count went below zero. Check enemy handling logic.");
+            _currentEnemiesAlive = 0;
         }
 
-        if (_currentEnemiesAlive != 0) return;
-        
-        StartCoroutine(WaitForNextRound());
+        if (_currentEnemiesAlive < _maxEnemyCountAtOnce && _totalEnemiesSpawnedThisRound < _maxEnemyCountPerRound)
+        {
+            _enemyPool.Get();
+        }
     }
     
     IEnumerator FadeOutStartRoundText()
