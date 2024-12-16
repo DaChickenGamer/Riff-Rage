@@ -52,7 +52,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -66,7 +66,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 20
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -272,7 +272,13 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Cyborg_climb_0: -8732556961932139593
+      Cyborg_climb_1: -9123236886331097322
+      Cyborg_climb_2: -2300765425255507982
+      Cyborg_climb_3: 2482160101574749654
+      Cyborg_climb_4: -7124600194411974872
+      Cyborg_climb_5: 8450851869260839019
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

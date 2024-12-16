@@ -150,7 +150,6 @@ public class GameManager : MonoBehaviour
         GameObject newEnemy = Instantiate(enemyPrefab, spawnPoint, Quaternion.identity);
         GameObject sprite = newEnemy.GetComponentInChildren<SpriteRenderer>().gameObject;
         Enemy enemyScript = sprite.AddComponent<Enemy>();
-        enemyScript.gameManagerObject = gameObject;
         enemyScript.SetPool(_enemyPool);
 
         return enemyScript;

@@ -52,7 +52,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -66,7 +66,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 20
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -272,7 +272,13 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Cyborg_doublejump_0: 363784652416304317
+      Cyborg_doublejump_1: 4068168339016699569
+      Cyborg_doublejump_2: 7114622223235341354
+      Cyborg_doublejump_3: 3792784760256814544
+      Cyborg_doublejump_4: 5007631374929226283
+      Cyborg_doublejump_5: -6805435369498406532
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

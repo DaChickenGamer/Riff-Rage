@@ -52,7 +52,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -66,7 +66,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 20
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -272,7 +272,13 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Cyborg_punch_0: -7754044219576928692
+      Cyborg_punch_1: 9073768392968845397
+      Cyborg_punch_2: 6600653351078863339
+      Cyborg_punch_3: -7994442447845178164
+      Cyborg_punch_4: 7721669680186173337
+      Cyborg_punch_5: -3954454121617434400
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
