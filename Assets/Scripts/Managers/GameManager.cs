@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
 
     private float _enemySpawnAreaColliderMinX, _enemySpawnAreaColliderMinY, _enemySpawnAreaColliderMaxX, _enemySpawnAreaColliderMaxY;
     private float _playerCameraMinX, _playerCameraMaxX, _playerCameraMinY, _playerCameraMaxY;
+    private int _currentScene = -1;
 
     private IObjectPool<Enemy> _enemyPool;
     
@@ -42,39 +43,55 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-        if (!(SceneManager.GetActiveScene() == SceneManager.GetSceneByName("Bucking Ham Palace Court Yard"))) return;
-        _enemyPool = new ObjectPool<Enemy>(CreateEnemy, OnGetEnemy, OnReleaseEnemy, OnDestroyEnemy, false, 20, 20);
-    }
-    
-    private void Start()
-    {
-        if (!(SceneManager.GetActiveScene() == SceneManager.GetSceneByName("Bucking Ham Palace Court Yard"))) return;
-
-        _enemySpawnAreaColliderMaxX = enemySpawnAreaCollider.bounds.max.x;
-        _enemySpawnAreaColliderMaxY = enemySpawnAreaCollider.bounds.max.y;
-        _enemySpawnAreaColliderMinX = enemySpawnAreaCollider.bounds.min.x;
-        _enemySpawnAreaColliderMinY = enemySpawnAreaCollider.bounds.min.y;
-        
-        _currentEnemiesAlive = 0;
-        
-        InitializeGrid();
-        PreSpawnEnemies();
-        
-        StartCoroutine(FadeOutRoundText());
-        StartCoroutine(DelayRoundStart());
-        AudioManager.Instance.StartBattleMusic();
     }
 
     private float _timeSinceLastSpawned;
     private float _timeBetweenSpawns;
     private void Update()
     {
+        DoSceneChanges();
+        
         if (_currentEnemiesAlive < _maxEnemyCountAtOnce &&
             _totalEnemiesSpawnedThisRound < _maxEnemyCountPerRound)
         {
             SpawnNextEnemy(); 
         }
+    }
+
+    private void DoSceneChanges()
+    {
+        if (SceneManager.GetActiveScene().buildIndex == _currentScene) return;
+        int newCurrentScene = SceneManager.GetActiveScene().buildIndex;
+
+        switch (newCurrentScene)
+        {
+            case 0:
+                AudioManager.Instance.PlayMusic("Hip Hop Vol2 Convos Main");
+                break;
+            case 1:
+                AudioManager.Instance.StopMusic();
+                _enemyPool = new ObjectPool<Enemy>(CreateEnemy, OnGetEnemy, OnReleaseEnemy, OnDestroyEnemy, false, 20, 20);
+                
+                enemySpawnAreaCollider = GameObject.Find("Enemy Spawner").GetComponent<Collider2D>();
+                waveCounterText = GameObject.Find("Wave Text").GetComponent<TextMeshProUGUI>();
+                
+                _enemySpawnAreaColliderMaxX = enemySpawnAreaCollider.bounds.max.x;
+                _enemySpawnAreaColliderMaxY = enemySpawnAreaCollider.bounds.max.y;
+                _enemySpawnAreaColliderMinX = enemySpawnAreaCollider.bounds.min.x;
+                _enemySpawnAreaColliderMinY = enemySpawnAreaCollider.bounds.min.y;
+
+                _currentEnemiesAlive = 0;
+
+                InitializeGrid();
+                PreSpawnEnemies();
+
+                StartCoroutine(FadeOutRoundText());
+                StartCoroutine(DelayRoundStart());
+                AudioManager.Instance.StartBattleMusic();
+                break;
+        }
+            
+        _currentScene = SceneManager.GetActiveScene().buildIndex;
     }
 
     private void SpawnNextEnemy()
@@ -142,9 +159,6 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
-    private bool _isSpawning;
-
     private Enemy CreateEnemy()
     {
         int randomSpawnPointListPosition = Random.Range(0, _potentialSpawnPoints.Count);

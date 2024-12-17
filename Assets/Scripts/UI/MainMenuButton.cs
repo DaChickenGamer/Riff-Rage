@@ -2,6 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainMenuButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -31,6 +32,7 @@ public class MainMenuButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     public void OnStartButtonClicked()
     {
         AudioManager.Instance.PlaySFX("switch_007");
+        SceneManager.LoadScene(1);
     }
     
     public void OnSettingsButtonClicked()

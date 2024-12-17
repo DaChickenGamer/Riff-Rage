@@ -26,13 +26,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        if (!(SceneManager.GetActiveScene() == SceneManager.GetSceneByName("Main Menu"))) return;
-        
-        AudioManager.Instance.PlayMusic("Hip Hop Vol2 Convos Main");
-    }
-
     public void PlayMusic(string name)
     {
         AudioClip sound = Array.Find(musicSounds, song => song.name == name);
@@ -47,6 +40,12 @@ public class AudioManager : MonoBehaviour
             musicSource.loop = true;
             musicSource.Play();
         }
+    }
+
+    public void StopMusic()
+    {
+        if (!musicSource.isPlaying) return;
+        musicSource.Stop();
     }
 
     public void PlaySFX(string name)
