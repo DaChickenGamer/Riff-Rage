@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
@@ -23,6 +24,13 @@ public class AudioManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    private void Start()
+    {
+        if (!(SceneManager.GetActiveScene() == SceneManager.GetSceneByName("Main Menu"))) return;
+        
+        AudioManager.Instance.PlayMusic("Hip Hop Vol2 Convos Main");
     }
 
     public void PlayMusic(string name)
