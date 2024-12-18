@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
@@ -7,6 +8,8 @@ public class UIManager : MonoBehaviour
 
     private int _screenResolutionNum;
     private int _currentScreenResolutionNum;
+
+    public Slider sfxSlider, musicSlider;
 
     private List<Vector2Int> _resolutions = new();
 
@@ -45,6 +48,9 @@ public class UIManager : MonoBehaviour
         }
 
         _screenResolutionNum = 0;
+        
+        sfxSlider.value = AudioManager.Instance.GetSfxVolume();
+        musicSlider.value = AudioManager.Instance.GetMusicVolume();
     }
 
     public int GetResolutionNumber()
@@ -93,5 +99,15 @@ public class UIManager : MonoBehaviour
     public int GetCurrentScreenResolutionNumber()
     {
         return _currentScreenResolutionNum;
+    }
+
+    public void OnSFXVolumeChanged()
+    {
+        AudioManager.Instance.SetSfxVolume(sfxSlider.value);
+    }
+
+    public void OnAudioVolumeChanged()
+    {
+        AudioManager.Instance.SetMusicVolume(musicSlider.value);
     }
 }

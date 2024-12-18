@@ -116,4 +116,25 @@ public class AudioManager : MonoBehaviour
 
         return list;
     }
+
+    public void SetSfxVolume(float volume)
+    {
+        musicSource.volume = volume;
+    }
+
+    public void SetMusicVolume(float volume)
+    {
+        sfxSource.volume = volume;
+    }
+
+    public float GetSfxVolume()
+    {
+        return sfxSource.volume;
+    }
+
+    public float GetMusicVolume()
+    {
+        return musicSource.volume;
+    }
+    
 }

@@ -168,4 +168,12 @@ public class MainMenuButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         _graphicsMenu.SetActive(false);
         _settingsMenu.SetActive(true);
     }
+
+    public void OnAudioMenuBackButtonClicked()
+    {
+        AudioManager.Instance.PlaySFX("switch_007");
+        _audioMenu.SetActive(false);
+        _settingsMenu.SetActive(true);
+    }
 }
+
