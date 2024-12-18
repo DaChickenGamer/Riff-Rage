@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class DebugPanel : MonoBehaviour
@@ -12,9 +13,19 @@ public class DebugPanel : MonoBehaviour
     private TextMeshProUGUI _enemiesSpawnedThisRoundText;
     private TextMeshProUGUI _maxEnemiesPerRoundText;
     
+    private TextMeshProUGUI _currentResolutionNumberText;
+    
     private void Start()
     {
         _background = GameObject.Find("Background");
+        
+        if (SceneManager.GetActiveScene().buildIndex == 0)
+        {
+            _currentResolutionNumberText = CreateNumberStatDebug("Resolution Number", UIManager.Instance.GetResolutionNumber());
+            _currentResolutionNumberText.transform.SetParent(_background.transform);
+        }
+        
+        if (SceneManager.GetActiveScene().buildIndex != 1) return;
         
         _roundNumberText = CreateNumberStatDebug("Round Number", GameManager.Instance.GetRoundNumber());
         _roundNumberText.transform.SetParent(_background.transform);
@@ -34,6 +45,13 @@ public class DebugPanel : MonoBehaviour
 
     private void Update()
     {
+        if (SceneManager.GetActiveScene().buildIndex == 0)
+        {
+            _currentResolutionNumberText.text = "Resolution Number : " + UIManager.Instance.GetResolutionNumber();
+        }
+        
+        if (SceneManager.GetActiveScene().buildIndex != 1) return;
+        
         _roundNumberText.text = "Round Number: " + GameManager.Instance.GetRoundNumber();
         _enemiesAliveText.text = "Enemies Alive: " + GameManager.Instance.GetCurrentEnemiesAlive();
         _maxEnemiesAtOnceText.text = "Max Enemies At Once: " + GameManager.Instance.GetMaxEnemyCountAtOnce();
