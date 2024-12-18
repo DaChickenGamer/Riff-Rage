@@ -5,12 +5,28 @@ using UnityEngine.InputSystem;
 public class Player : MonoBehaviour
 {
     private Vector2 pointerInput;
+    
     [SerializeField]
-    private InputActionReference pointerPosition;
+    private InputActionReference pointerPosition, attack;
 
     private ParentWeapon _parentWeapon;
 
     // add health script here
+
+    private void OnEnable()
+    {
+        attack.action.performed += PerformAttack;
+    }
+
+    private void OnDisable()
+    {
+        attack.action.performed -= PerformAttack;
+    }
+
+    private void PerformAttack(InputAction.CallbackContext obj)
+    {
+        _parentWeapon.Attack();
+    }
 
     private void Awake()
     {
