@@ -190,6 +190,10 @@ MonoBehaviour:
   sfxSounds:
   - {fileID: 8300000, guid: ff17a9dbfb30a6840b2066043da1ea4f, type: 3}
   - {fileID: 8300000, guid: b4d9f9d6bff2ba44289d2b322d1445c4, type: 3}
+  - {fileID: 8300000, guid: 166233cc2e354b34d847d0c6fdb9e8b9, type: 3}
+  - {fileID: 8300000, guid: c3f2d685d48849741b194b03a49a59b9, type: 3}
+  - {fileID: 8300000, guid: 0ef1777a530d83a4b959e40dbf2fc4c0, type: 3}
+  - {fileID: 8300000, guid: ef188aa4f75033946ad51285ff9c8e36, type: 3}
   musicSource: {fileID: 6761930767405711091}
   sfxSource: {fileID: 2222757583133902256}
 --- !u!1 &4181762366611312259

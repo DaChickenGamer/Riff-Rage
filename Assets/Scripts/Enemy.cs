@@ -6,7 +6,7 @@ using UnityEngine.Pool;
 public class Enemy : MonoBehaviour
 {
     private GameObject _player;
-    private float _speed = 6.0f;
+    private float _speed = 4.0f;
 
     private Animator _animator;
     private SpriteRenderer _spriteRenderer;

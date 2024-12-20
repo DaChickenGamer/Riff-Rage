@@ -11,7 +11,7 @@ public class Player : MonoBehaviour
 
     private int _health;
 
-    private ParentWeapon _parentWeapon;
+    private PlayerWeapon _playerWeapon;
     private Animator _animator;
     
     private void OnEnable()
@@ -26,17 +26,17 @@ public class Player : MonoBehaviour
 
     private void PerformAttack(InputAction.CallbackContext obj)
     {
-        _parentWeapon.Attack();
+        _playerWeapon.Attack();
     }
 
     private void Awake()
     {
-        _parentWeapon = GetComponentInChildren<ParentWeapon>();
+        _playerWeapon = GetComponentInChildren<PlayerWeapon>();
     }
     private void Update()
     {
         pointerInput = GetPointerInput();
-        _parentWeapon.pointerPosition = pointerInput;
+        _playerWeapon.PointerPosition = pointerInput;
     }
 
     public int GetPlayerHealth()
@@ -47,6 +47,17 @@ public class Player : MonoBehaviour
     public void TakeDamage(int damage)
     {
         _health -= damage;
+        AudioManager.Instance.PlaySFX("Pain");
+        
+        if (_health > 0) return;
+        Death();
+    }
+
+    public void Death()
+    {
+        // Trigger Death Animation
+        // Hide
+        // Pull up death ui
     }
 
     private Vector2 GetPointerInput()
