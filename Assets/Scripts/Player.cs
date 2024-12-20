@@ -39,6 +39,19 @@ public class Player : MonoBehaviour
         _playerWeapon.PointerPosition = pointerInput;
     }
 
+    public void OnMenuOpen(InputAction.CallbackContext ctxt)
+    {
+        if (!ctxt.started) return;
+        if (UIManager.Instance.GetIngameMenuActive())
+        {
+            UIManager.Instance.CloseIngameMenu();
+        }
+        else if (!UIManager.Instance.GetIngameMenuActive())
+        {
+            UIManager.Instance.OpenIngameMenu();
+        }
+    }
+
     public int GetPlayerHealth()
     {
         return _health;

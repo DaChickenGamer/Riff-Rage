@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
@@ -10,6 +11,7 @@ public class UIManager : MonoBehaviour
     private int _currentScreenResolutionNum;
 
     public Slider sfxSlider, musicSlider;
+    public GameObject ingameMenu;
 
     private List<Vector2Int> _resolutions = new();
 
@@ -23,7 +25,15 @@ public class UIManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        
+        if (ingameMenu != null) ingameMenu.SetActive(false);
+        
+        if (SceneManager.GetActiveScene().buildIndex != 0) return;
+        InitializeMainMenuValues();
+    }
 
+    private void InitializeMainMenuValues()
+    {
         _resolutions.Clear();
 
         int lastWidthAdded = 0;
@@ -109,5 +119,27 @@ public class UIManager : MonoBehaviour
     public void OnAudioVolumeChanged()
     {
         AudioManager.Instance.SetMusicVolume(musicSlider.value);
+    }
+
+    public void OnIngameMenuQuitButtonClicked()
+    {
+        SceneManager.LoadScene("Main Menu");
+    }
+
+    public void OpenIngameMenu()
+    {
+        Time.timeScale = 0;
+        ingameMenu.SetActive(true);
+    }
+
+    public void CloseIngameMenu()
+    {
+        ingameMenu.SetActive(false);
+        Time.timeScale = 1;
+    }
+
+    public bool GetIngameMenuActive()
+    {
+        return ingameMenu.activeSelf;
     }
 }
