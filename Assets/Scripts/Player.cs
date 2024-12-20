@@ -12,9 +12,8 @@ public class Player : MonoBehaviour
     private int _health;
 
     private ParentWeapon _parentWeapon;
-
-    // add health script here
-
+    private Animator _animator;
+    
     private void OnEnable()
     {
         attack.action.performed += PerformAttack;

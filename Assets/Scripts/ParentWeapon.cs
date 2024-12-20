@@ -30,14 +30,13 @@ public class ParentWeapon : MonoBehaviour
         transform.right = direction;
         
         Vector2 scale = transform.localScale;
-        
-        if (direction.x < 0)
+
+        scale.y = direction.x switch
         {
-            scale.y = -1;
-        }else if (direction.x > 0)
-        {
-            scale.y = 1;
-        }
+            < 0 => -1,
+            > 0 => 1,
+            _ => scale.y
+        };
         transform.localScale = scale;
 
         if (transform.eulerAngles.z > 0 && transform.eulerAngles.z < 180)
