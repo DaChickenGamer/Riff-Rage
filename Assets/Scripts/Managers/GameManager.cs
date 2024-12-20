@@ -175,6 +175,7 @@ public class GameManager : MonoBehaviour
 
     private void OnGetEnemy(Enemy enemy)
     {
+        enemy.ResetEnemy();
         enemy.gameObject.SetActive(true);
         enemy.transform.position = GetRandomSpawnPoint();
     }

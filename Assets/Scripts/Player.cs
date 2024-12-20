@@ -9,6 +9,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     private InputActionReference pointerPosition, attack;
 
+    private int _health;
+
     private ParentWeapon _parentWeapon;
 
     // add health script here
@@ -36,6 +38,16 @@ public class Player : MonoBehaviour
     {
         pointerInput = GetPointerInput();
         _parentWeapon.pointerPosition = pointerInput;
+    }
+
+    public int GetPlayerHealth()
+    {
+        return _health;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        _health -= damage;
     }
 
     private Vector2 GetPointerInput()

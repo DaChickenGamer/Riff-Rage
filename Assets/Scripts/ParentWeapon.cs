@@ -71,18 +71,16 @@ public class ParentWeapon : MonoBehaviour
     {
         Gizmos.color = Color.blue;
         Vector3 position = circleOrigin == null ? Vector3.zero : circleOrigin.position;
-        Gizmos.DrawWireSphere(position, radius);
     }
 
     public void DetectColliders()
     {
         foreach (Collider2D collider in Physics2D.OverlapCircleAll(circleOrigin.position, radius))
         {
-            Debug.Log(collider.name);
-            if (collider.CompareTag("Enemy"))
-            {
-                collider.gameObject.GetComponent<Enemy>().GetDamaged(50);
-            }
+            if (collider.transform.parent == null) return;
+            
+            if (!collider.transform.parent.CompareTag("Enemy")) return;
+            collider.gameObject.GetComponent<Enemy>().TakeDamage(50);
         }
     }
 }
