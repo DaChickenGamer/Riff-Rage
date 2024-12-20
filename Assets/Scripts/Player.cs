@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -18,6 +19,8 @@ public class Player : MonoBehaviour
     private bool _isPlayingDeathSound;
 
     public GameObject deathUI;
+    
+    public Slider healthSlider;
     
     private void OnEnable()
     {
@@ -44,6 +47,7 @@ public class Player : MonoBehaviour
     {
         pointerInput = GetPointerInput();
         _playerWeapon.PointerPosition = pointerInput;
+        healthSlider.value = _health;
     }
 
     public void OnMenuOpen(InputAction.CallbackContext ctxt)

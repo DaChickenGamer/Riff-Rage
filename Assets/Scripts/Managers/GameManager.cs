@@ -125,7 +125,7 @@ public class GameManager : MonoBehaviour
     {
         _roundNumber++;
         _totalEnemiesSpawnedThisRound = 0;
-        _maxEnemyCountPerRound = 5 + _roundNumber * _roundNumber;
+        _maxEnemyCountPerRound = Random.Range(3,7) + _roundNumber * _roundNumber;
         
         // This is a desmos graph for the below equation
         // https://www.desmos.com/calculator/tthykrvgcq
