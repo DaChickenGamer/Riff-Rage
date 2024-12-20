@@ -14,6 +14,9 @@ public class ParentWeapon : MonoBehaviour
 
     public bool IsAttacking { get; private set; }
 
+    //combat
+    public Transform circleOrigin;
+    public float radius;
     public void ResetIsAttacking()
     {
         IsAttacking = false;
@@ -22,7 +25,7 @@ public class ParentWeapon : MonoBehaviour
     private void Update()
     {
         if (IsAttacking)
-            return;
+            return; 
         Vector2 direction = (pointerPosition -(Vector2)transform.position).normalized;
         transform.right = direction;
         
@@ -61,5 +64,25 @@ public class ParentWeapon : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         attackBlocked = false;
+    }
+    
+    //combat
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.blue;
+        Vector3 position = circleOrigin == null ? Vector3.zero : circleOrigin.position;
+        Gizmos.DrawWireSphere(position, radius);
+    }
+
+    public void DetectColliders()
+    {
+        foreach (Collider2D collider in Physics2D.OverlapCircleAll(circleOrigin.position, radius))
+        {
+            Debug.Log(collider.name);
+            if (collider.CompareTag("Enemy"))
+            {
+                collider.gameObject.GetComponent<Enemy>().GetDamaged(50);
+            }
+        }
     }
 }
