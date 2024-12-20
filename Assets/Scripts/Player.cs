@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,7 +13,11 @@ public class Player : MonoBehaviour
     private int _health;
 
     private PlayerWeapon _playerWeapon;
-    private Animator _animator;
+    public Animator animator;
+    private bool _isDead;
+    private bool _isPlayingDeathSound;
+
+    public GameObject deathUI;
     
     private void OnEnable()
     {
@@ -32,6 +37,8 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         _playerWeapon = GetComponentInChildren<PlayerWeapon>();
+        deathUI.SetActive(false);
+        _health = 100;
     }
     private void Update()
     {
@@ -41,7 +48,7 @@ public class Player : MonoBehaviour
 
     public void OnMenuOpen(InputAction.CallbackContext ctxt)
     {
-        if (!ctxt.started) return;
+        if (!ctxt.started && IsDead()) return;
         if (UIManager.Instance.GetIngameMenuActive())
         {
             UIManager.Instance.CloseIngameMenu();
@@ -60,7 +67,7 @@ public class Player : MonoBehaviour
     public void TakeDamage(int damage)
     {
         _health -= damage;
-        AudioManager.Instance.PlaySFX("Pain");
+        PlayHitSound();
         
         if (_health > 0) return;
         Death();
@@ -68,9 +75,27 @@ public class Player : MonoBehaviour
 
     public void Death()
     {
-        // Trigger Death Animation
-        // Hide
-        // Pull up death ui
+        _isDead = true;
+        animator.SetTrigger("isDead");
+        StartCoroutine(WaitForDeathAnimation());
+        gameObject.SetActive(false);
+        deathUI.SetActive(true);
+    }
+    
+    public bool IsDead()
+    {
+        return _isDead;
+    }
+
+    public void PlayHitSound()
+    {
+        if (!_isPlayingDeathSound)
+        {
+            _isPlayingDeathSound = true;
+            AudioManager.Instance.PlaySFX("Pain");
+            StartCoroutine(WaitForHitSound());
+        }
+            
     }
 
     private Vector2 GetPointerInput()
@@ -78,5 +103,17 @@ public class Player : MonoBehaviour
         Vector3 mousePos = pointerPosition.action.ReadValue<Vector2>();
         mousePos.z = Camera.main.nearClipPlane;
         return Camera.main.ScreenToWorldPoint(mousePos);
+    }
+
+    private IEnumerator WaitForHitSound()
+    {
+        yield return new WaitForSeconds(AudioManager.Instance.GetSfxLength("Pain"));
+        _isPlayingDeathSound = false;
+    }
+    
+    private IEnumerator WaitForDeathAnimation()
+    {
+        yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
+
     }
 }

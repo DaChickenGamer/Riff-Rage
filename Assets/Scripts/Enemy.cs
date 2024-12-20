@@ -16,6 +16,7 @@ public class Enemy : MonoBehaviour
 
     private IObjectPool<Enemy> _enemyPool;
     private bool _isAlive = true;
+    private bool _damagePlayerDelay = false;
     
     private void Awake()
     {
@@ -90,18 +91,25 @@ public class Enemy : MonoBehaviour
         _isAlive = true;
     }
 
-    private void OnCollisionEnter2D(Collision2D other)
+    private void OnCollisionStay2D(Collision2D other)
     {
+        if (!other.gameObject.CompareTag("Player")) return;
         
-        if (other.gameObject.CompareTag("Player"))
-        {
-            other.gameObject.GetComponent<Player>().TakeDamage(10);
-        }
+        if (_damagePlayerDelay) return;
+        _damagePlayerDelay = true;
+        other.gameObject.GetComponent<Player>().TakeDamage(10);
+        StartCoroutine(HitDelay());
     }
 
     public void SetSpawnPosition(Vector3 spawnPosition)
     {
         _spawnPosition = spawnPosition;
+    }
+
+    private IEnumerator HitDelay()
+    {
+        yield return new WaitForSeconds(.5f);
+        _damagePlayerDelay = false;
     }
 
     private IEnumerator TakeDamageAnimation()

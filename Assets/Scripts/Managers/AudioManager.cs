@@ -62,6 +62,21 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    public float GetSfxLength(string name)
+    {
+        AudioClip sound = Array.Find(sfxSounds, sfx => sfx.name == name);
+
+        if (sound == null)
+        {
+            Debug.Log("Sound Not Found");
+            return 0f;
+        }
+        else
+        {
+            return sound.length;
+        }
+    }
+
     public void StartBattleMusic()
     {
         if (_isBattleMusicPlaying) return;

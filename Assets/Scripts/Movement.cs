@@ -12,13 +12,17 @@ public class PlayerMovement : MonoBehaviour
 
     public GameObject weaponSprite;
     public Animator animator;
+    private Player _player;
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>(); 
+        _player = GetComponent<Player>();
     }
     public void OnMovement(InputAction.CallbackContext ctxt)
     {
         direction = ctxt.ReadValue<Vector2>();
+
+        if (_player.IsDead()) return;
 
         if (direction.x != 0 || direction.y != 0)
         {
