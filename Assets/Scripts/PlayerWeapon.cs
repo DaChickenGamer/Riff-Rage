@@ -17,6 +17,9 @@ public class PlayerWeapon : MonoBehaviour
     //combat
     public Transform circleOrigin;
     public float radius;
+    
+    public GameObject hitParticlePrefab;
+
     public void ResetIsAttacking()
     {
         IsAttacking = false;
@@ -54,6 +57,7 @@ public class PlayerWeapon : MonoBehaviour
         if (attackBlocked)
             return;
         animator.SetTrigger("Attack");
+        AudioManager.Instance.PlaySFX("swoosh");
         IsAttacking = true;
         attackBlocked = true;
         StartCoroutine(DelayAttack());
@@ -77,10 +81,10 @@ public class PlayerWeapon : MonoBehaviour
         foreach (Collider2D collider in Physics2D.OverlapCircleAll(circleOrigin.position, radius))
         {
             if (collider.transform.parent == null) return;
-            
+        
             if (!collider.transform.parent.CompareTag("Enemy")) return;
 
-            switch (Random.Range(0, 2))
+            switch (Random.Range(0, 3))
             {
                 case 0:
                     AudioManager.Instance.PlaySFX("Massive Punch A");
@@ -92,9 +96,14 @@ public class PlayerWeapon : MonoBehaviour
                     AudioManager.Instance.PlaySFX("Massive Punch C");
                     break;
             }
+
+            if (hitParticlePrefab != null)
+            {
+                GameObject hitParticle = Instantiate(hitParticlePrefab, collider.transform.position, Quaternion.identity);
             
-            // Adds particles when hitting the enemy
-            
+                Destroy(hitParticle, 0.3f);
+            }
+
             collider.gameObject.GetComponent<Enemy>().TakeDamage(50);
         }
     }
