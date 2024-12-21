@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.SceneManagement;
@@ -26,10 +27,10 @@ public class GameManager : MonoBehaviour
     private float _enemySpawnAreaColliderMinX, _enemySpawnAreaColliderMinY, _enemySpawnAreaColliderMaxX, _enemySpawnAreaColliderMaxY;
     private float _playerCameraMinX, _playerCameraMaxX, _playerCameraMinY, _playerCameraMaxY;
     private int _currentScene = -1;
-
+    
     private IObjectPool<Enemy> _enemyPool;
     
-    private List<Enemy> _allEnemies = new List<Enemy>();
+    private List<Enemy> _allEnemies = new();
     private bool _fadeOutText = false;
     
     private void Awake()
@@ -67,30 +68,16 @@ public class GameManager : MonoBehaviour
         if (SceneManager.GetActiveScene().buildIndex == _currentScene) return;
         int newCurrentScene = SceneManager.GetActiveScene().buildIndex;
 
+        AudioManager.Instance.StopMusic();
+        
         switch (newCurrentScene)
         {
             case 0:
                 AudioManager.Instance.PlayMusic("Hip Hop Vol2 Convos Main");
                 break;
             case 1:
-                AudioManager.Instance.StopMusic();
-                _enemyPool = new ObjectPool<Enemy>(CreateEnemy, OnGetEnemy, OnReleaseEnemy, OnDestroyEnemy, false, 20, 20);
-                
-                enemySpawnAreaCollider = GameObject.Find("Enemy Spawner").GetComponent<Collider2D>();
-                waveCounterText = GameObject.Find("Wave Text").GetComponent<TextMeshProUGUI>();
-                
-                _enemySpawnAreaColliderMaxX = enemySpawnAreaCollider.bounds.max.x;
-                _enemySpawnAreaColliderMaxY = enemySpawnAreaCollider.bounds.max.y;
-                _enemySpawnAreaColliderMinX = enemySpawnAreaCollider.bounds.min.x;
-                _enemySpawnAreaColliderMinY = enemySpawnAreaCollider.bounds.min.y;
-
-                _currentEnemiesAlive = 0;
-
-                InitializeGrid();
-                PreSpawnEnemies();
-                
-                StartFadeOutRoundText();
                 AudioManager.Instance.StartBattleMusic();
+                StartGame();
                 break;
         }
             
@@ -302,5 +289,47 @@ public class GameManager : MonoBehaviour
         waveCounterText.alpha = 1f;
         _fadeOutText = true;
         _fadeStartTime = Time.time;
+    }
+
+    public void StartGame()
+    {
+        Time.timeScale = 1f;
+        
+        foreach (GameObject enemy in GameObject.FindGameObjectsWithTag("Enemy"))
+            Destroy(enemy);
+        _allEnemies.Clear();
+        
+        _enemyPool = new ObjectPool<Enemy>(CreateEnemy, OnGetEnemy, OnReleaseEnemy, OnDestroyEnemy, false, 20, 20);
+                
+        enemySpawnAreaCollider = GameObject.Find("Enemy Spawner").GetComponent<Collider2D>();
+        waveCounterText = GameObject.Find("Wave Text").GetComponent<TextMeshProUGUI>();
+                
+        _enemySpawnAreaColliderMaxX = enemySpawnAreaCollider.bounds.max.x;
+        _enemySpawnAreaColliderMaxY = enemySpawnAreaCollider.bounds.max.y;
+        _enemySpawnAreaColliderMinX = enemySpawnAreaCollider.bounds.min.x;
+        _enemySpawnAreaColliderMinY = enemySpawnAreaCollider.bounds.min.y;
+
+        _currentEnemiesAlive = 0;
+        _roundNumber = 0;
+        _totalEnemiesSpawnedThisRound = 0;
+        _maxEnemyCountAtOnce = 0;
+        _maxEnemyCountPerRound = 0;
+        
+        GameObject player = GameObject.FindWithTag("Player");
+
+        foreach (Transform child in player.transform)
+        {
+            if (child.name == "Biker Sprite")
+                child.GetComponent<SpriteRenderer>().enabled = true;
+        }
+        player.transform.position = new Vector3(0, 0, 0);
+        
+        Player playerScript = player.GetComponent<Player>();
+        playerScript.ResetPlayer();
+        playerScript.DisableDeathUI();
+        
+        InitializeGrid();
+        PreSpawnEnemies();
+        StartFadeOutRoundText();
     }
 }

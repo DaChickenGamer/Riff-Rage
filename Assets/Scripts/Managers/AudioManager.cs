@@ -46,6 +46,8 @@ public class AudioManager : MonoBehaviour
     {
         if (!musicSource.isPlaying) return;
         musicSource.Stop();
+
+        _isBattleMusicPlaying = false;
     }
 
     public void PlaySFX(string name)

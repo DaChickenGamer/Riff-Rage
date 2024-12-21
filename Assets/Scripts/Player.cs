@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -68,6 +69,14 @@ public class Player : MonoBehaviour
         return _health;
     }
 
+    public void ResetPlayer()
+    {
+        _health = 100;
+        _isDead = false;
+        animator.ResetTrigger("isDead");
+        animator.Play("BikerIdle");
+    }
+
     public void TakeDamage(int damage)
     {
         _health -= damage;
@@ -82,8 +91,18 @@ public class Player : MonoBehaviour
         _isDead = true;
         animator.SetTrigger("isDead");
         StartCoroutine(WaitForDeathAnimation());
-        gameObject.SetActive(false);
+        foreach (Transform child in gameObject.transform)
+        {
+            if (child.name == "Biker Sprite")
+                child.GetComponent<SpriteRenderer>().enabled = true;
+        }        
         deathUI.SetActive(true);
+        Time.timeScale = 0;
+    }
+
+    public void DisableDeathUI()
+    {
+        deathUI.SetActive(false);
     }
     
     public bool IsDead()
