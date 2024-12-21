@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: 2518675509632517941}
   - component: {fileID: 6137676510927444825}
   - component: {fileID: 4684911320145095332}
+  - component: {fileID: 256055403161078520}
   m_Layer: 0
   m_Name: Enemy Sprite
   m_TagString: Untagged
@@ -189,3 +190,29 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1.796165}
   m_EdgeRadius: 0
+--- !u!114 &256055403161078520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 686928856436662491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03084e7bf73b013458d99b2a8e87c9a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectsToShatterInto:
+  - {fileID: 980346040730365441, guid: b0689e78c89762448b7f7477c833f3da, type: 3}
+  - {fileID: 6853443565440761353, guid: f809a22127adde3449c4ab1591f4bc11, type: 3}
+  - {fileID: 4937958096431714901, guid: 5ca3e93ea1d646640bd2ed331c1f110a, type: 3}
+  - {fileID: 8278972630400501150, guid: 3f1a34d2f888e8f42977cde09cb27164, type: 3}
+  - {fileID: 3216120574268674254, guid: 77fb874ae1d90624ea67a3446e7c71e6, type: 3}
+  - {fileID: 8212646761033420326, guid: 7de9c070a9a73db4cb55f153e78a72b2, type: 3}
+  minimumShatterDirectionX: -1
+  minimumShatterDirectionY: -1
+  maximumShatterDirectionX: 1
+  maximumShatterDirectionY: 1
+  minimumTorque: 5
+  maximumTorque: 10
+  fadeDuration: 2

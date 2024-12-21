@@ -1432,8 +1432,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_SortingOrder: 5
+  m_Sprite: {fileID: -4682421474997173924, guid: 506e6dbc676716e43b91c187552e15a3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -2573,3 +2573,4 @@ MonoBehaviour:
   attack: {fileID: -6848011493611860753, guid: f08ee4d6ab543f34c8109372f19f266f, type: 3}
   animator: {fileID: 0}
   deathUI: {fileID: 0}
+  healthSlider: {fileID: 0}

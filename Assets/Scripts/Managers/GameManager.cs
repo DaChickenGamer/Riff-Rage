@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviour
     private IObjectPool<Enemy> _enemyPool;
     
     private List<Enemy> _allEnemies = new List<Enemy>();
+    private bool _fadeOutText = false;
     
     private void Awake()
     {
@@ -56,6 +57,9 @@ public class GameManager : MonoBehaviour
         {
             SpawnNextEnemy(); 
         }
+        
+        if (_fadeOutText)
+            FadeOutRoundText();
     }
 
     private void DoSceneChanges()
@@ -84,9 +88,8 @@ public class GameManager : MonoBehaviour
 
                 InitializeGrid();
                 PreSpawnEnemies();
-
-                StartCoroutine(FadeOutRoundText());
-                StartCoroutine(DelayRoundStart());
+                
+                StartFadeOutRoundText();
                 AudioManager.Instance.StartBattleMusic();
                 break;
         }
@@ -96,19 +99,17 @@ public class GameManager : MonoBehaviour
 
     private void SpawnNextEnemy()
     {
-        if (_currentEnemiesAlive < _maxEnemyCountAtOnce && _totalEnemiesSpawnedThisRound < _maxEnemyCountPerRound)
-        {
-            Enemy enemy = _enemyPool.Get();
-            if (enemy != null)
-            {
-                enemy.gameObject.SetActive(true);
-                Vector3 randomSpawnPosition = GetRandomSpawnPoint();
-                enemy.transform.position = randomSpawnPosition;
-                enemy.SetSpawnPosition(randomSpawnPosition);
-                _currentEnemiesAlive++;
-                _totalEnemiesSpawnedThisRound++;
-            }
-        }
+        if (_currentEnemiesAlive >= _maxEnemyCountAtOnce || _totalEnemiesSpawnedThisRound >= _maxEnemyCountPerRound) return;
+
+        if (_potentialSpawnPoints.Count <= 0) return;
+        Enemy enemy = _enemyPool.Get();
+        if (enemy == null) return;
+        enemy.GetComponent<SpriteRenderer>().enabled = true;
+        Vector3 randomSpawnPosition = GetRandomSpawnPoint();
+        enemy.transform.position = randomSpawnPosition;
+        enemy.SetSpawnPosition(randomSpawnPosition);
+        _currentEnemiesAlive++;
+        _totalEnemiesSpawnedThisRound++;
     }
     
     private void PreSpawnEnemies()
@@ -116,17 +117,18 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < 20; i++)
         {
             Enemy enemy = _enemyPool.Get();
-            enemy.gameObject.SetActive(false);
+            enemy.GetComponent<SpriteRenderer>().enabled = false;
             _allEnemies.Add(enemy);
         }
     }
 
     private void StartRound()
     {
+        _fadeOutText = false;
         _roundNumber++;
         _totalEnemiesSpawnedThisRound = 0;
-        _maxEnemyCountPerRound = Random.Range(3,7) + _roundNumber * _roundNumber;
-        
+        _maxEnemyCountPerRound = Random.Range(3, 7) + _roundNumber * _roundNumber;
+
         // This is a desmos graph for the below equation
         // https://www.desmos.com/calculator/tthykrvgcq
         _maxEnemyCountAtOnce = Mathf.Clamp(Mathf.RoundToInt(_maxEnemyCountPerRound * 0.25f), 5, 20);
@@ -175,20 +177,19 @@ public class GameManager : MonoBehaviour
 
     private void OnGetEnemy(Enemy enemy)
     {
-        enemy.ResetEnemy();
-        enemy.gameObject.SetActive(true);
+        enemy.GetComponent<SpriteRenderer>().enabled = true;
         enemy.transform.position = GetRandomSpawnPoint();
     }
 
     private void OnReleaseEnemy(Enemy enemy)
     {
-        enemy.gameObject.SetActive(false);
+        enemy.ResetEnemy();
+        enemy.GetComponent<SpriteRenderer>().enabled = false;
         _currentEnemiesAlive = Mathf.Max(0, _currentEnemiesAlive - 1);
-        
-        if (_currentEnemiesAlive <= 0)
+
+        if (_currentEnemiesAlive == 0 && _totalEnemiesSpawnedThisRound >= _maxEnemyCountPerRound)
         {
-            StartCoroutine(FadeOutRoundText());
-            StartCoroutine(DelayRoundStart());
+            StartFadeOutRoundText();
         }
     }
 
@@ -276,24 +277,30 @@ public class GameManager : MonoBehaviour
 
     private float _transitionDuration = 3f;
     
-    IEnumerator FadeOutRoundText()
-    {
-        waveCounterText.alpha = 1;
-        waveCounterText.text = "Wave " + (_roundNumber + 1);
+    private float _fadeStartTime;
 
-        float timer = 0; 
-        
-        while (timer < _transitionDuration)
+    private void FadeOutRoundText()
+    {
+        if (!_fadeOutText) return;
+
+        float elapsedTime = Time.time - _fadeStartTime;
+        waveCounterText.alpha = Mathf.Lerp(1f, 0f, elapsedTime / _transitionDuration);
+
+        if (!(elapsedTime >= _transitionDuration)) return;
+        waveCounterText.alpha = 0f;
+        _fadeOutText = false;
+
+        if (_currentEnemiesAlive == 0)
         {
-            waveCounterText.alpha = Mathf.Lerp(1f, 0f, timer / _transitionDuration);
-            timer += Time.deltaTime;
-            yield return null;
+            StartRound();
         }
     }
-    IEnumerator DelayRoundStart()
+
+    private void StartFadeOutRoundText()
     {
-        yield return new WaitForSeconds(_transitionDuration);
-        StartRound();
+        waveCounterText.text = "Wave " + (_roundNumber + 1);
+        waveCounterText.alpha = 1f;
+        _fadeOutText = true;
+        _fadeStartTime = Time.time;
     }
-     
 }

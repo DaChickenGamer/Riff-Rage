@@ -93,6 +93,8 @@ public class PlayerWeapon : MonoBehaviour
                     break;
             }
             
+            // Adds particles when hitting the enemy
+            
             collider.gameObject.GetComponent<Enemy>().TakeDamage(50);
         }
     }
